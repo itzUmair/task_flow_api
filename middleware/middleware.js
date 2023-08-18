@@ -20,3 +20,24 @@ export const authenticationMiddleware = (req, res, next) => {
     return res.status(401).send({ message: "Invalid token." });
   }
 };
+
+export const loggerMiddleware = (req, res, next) => {
+  const startTime = Date.now();
+  const { method, url } = req;
+
+  res.on("finish", () => {
+    const endTime = Date.now();
+    const responseTime = endTime - startTime;
+
+    const logEntry = {
+      timestamp: new Date().toISOString(),
+      method,
+      url,
+      responseTime: `${responseTime}ms`,
+    };
+
+    console.log(JSON.stringify(logEntry));
+  });
+
+  next();
+};
