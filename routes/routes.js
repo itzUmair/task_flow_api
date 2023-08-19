@@ -6,6 +6,7 @@ import {
   signin,
   getUserDetails,
   createTeam,
+  createTask,
 } from "../controllers/controllers.js";
 
 const router = Router();
@@ -16,5 +17,6 @@ router.route("/signup").post(signup);
 router.route("/signin").post(signin);
 router.route("/userdetails").get(getUserDetails);
 router.route("/createteam").post(createTeam);
+router.route("/task/create").put(createTask);
 
 export default router;

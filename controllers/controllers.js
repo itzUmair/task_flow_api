@@ -88,6 +88,58 @@ export const createTeam = async (req, res) => {
 
     res.status(201).send({ message: "team created successfully" });
   } catch (error) {
-    res.status(400).send({ message: error._message });
+    if (error instanceof mongoose.Error.ValidationError) {
+      res.status(400).send({ message: error._message });
+    }
+    res.status(500).send({ message: "something went wrong" });
+  }
+};
+
+export const createTask = async (req, res) => {
+  const {
+    title,
+    description,
+    priority,
+    deadline,
+    state,
+    completionDate,
+    completedBy,
+    createdBy,
+    createdOn,
+    teamID,
+  } = req.body;
+
+  const team = await teamModel.findOne({ _id: teamID });
+  if (!team) {
+    res.status(404).send({ message: "no team with this team id found" });
+    return;
+  }
+  try {
+    team.tasks.push(
+      { _id: teamID },
+      {
+        tasks: [
+          ...team.tasks,
+          {
+            title,
+            description,
+            priority,
+            deadline,
+            state,
+            completionDate,
+            completedBy,
+            createdBy,
+            createdOn,
+          },
+        ],
+      }
+    );
+    await team.save();
+    res.status(200).send({ message: "task created successfully" });
+  } catch (error) {
+    if (error instanceof mongoose.Error.ValidationError) {
+      res.status(400).send({ message: error._message });
+    }
+    res.status(500).send({ message: "something went wrong" });
   }
 };
