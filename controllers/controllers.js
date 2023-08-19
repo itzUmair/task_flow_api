@@ -9,6 +9,10 @@ export const home = (req, res) => {
   res.status(200).send("Task flow API");
 };
 
+export const verifyToken = (req, res) => {
+  res.status(200).send({ message: "token verified" });
+};
+
 export const signup = async (req, res) => {
   const { first_name, last_name, bio, occupation, email, password } = req.body;
   const userExists = await userModel.findOne({ email });
@@ -54,4 +58,15 @@ export const signin = async (req, res) => {
     expiresIn: "24h",
   });
   res.status(200).send({ message: "logged in successfully", token });
+};
+
+export const getUserDetails = async (req, res) => {
+  const token = req.headers.authorization.split(" ")[1];
+  const userID = jwt.decode(token, process.env.JWT_SECRET).userid;
+  const userData = await userModel.findById(userID);
+  if (!userData) {
+    res.status(404).send({ message: "no user found" });
+    return;
+  }
+  res.status(200).send({ message: "user found successfully", data: userData });
 };
