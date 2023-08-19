@@ -21,7 +21,7 @@ const teamSchema = new mongoose.Schema(
       },
     ],
   },
-  { collection: teams }
+  { collection: "teams" }
 );
 const teamModel = mongoose.model(teamSchema, teamSchema);
 

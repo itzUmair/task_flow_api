@@ -17,7 +17,7 @@ app.use(
 app.use(express.json());
 
 app.use(middlewares.loggerMiddleware);
-app.use(middlewares.authenticationMiddleware);
+// app.use(middlewares.authenticationMiddleware);
 
 app.use("/api/v1/", router);
 
