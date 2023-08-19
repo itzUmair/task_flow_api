@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import asyncHanlder from "express-async-handler";
 import userModel from "../models/user_schema.js";
 import teamModel from "../models/teams_schema.js";
-import { generateRandomId } from "../utils/utils.js";
+import { generateRandomId, getUserIdFromToken } from "../utils/utils.js";
 
 export const home = (req, res) => {
   res.status(200).send("Task flow API");
@@ -61,12 +61,33 @@ export const signin = async (req, res) => {
 };
 
 export const getUserDetails = async (req, res) => {
-  const token = req.headers.authorization.split(" ")[1];
-  const userID = jwt.decode(token, process.env.JWT_SECRET).userid;
+  const userID = getUserIdFromToken(req);
   const userData = await userModel.findById(userID);
   if (!userData) {
     res.status(404).send({ message: "no user found" });
     return;
   }
   res.status(200).send({ message: "user found successfully", data: userData });
+};
+
+export const createTeam = async (req, res) => {
+  const { name, description, members, badgeColor } = req.body;
+  const createrID = getUserIdFromToken(req);
+  const teamID = generateRandomId();
+
+  try {
+    await teamModel.create({
+      _id: teamID,
+      name,
+      description,
+      members: [createrID, ...members],
+      badgeColor,
+      createdBy: createrID,
+      tasks: [],
+    });
+
+    res.status(201).send({ message: "team created successfully" });
+  } catch (error) {
+    res.status(400).send({ message: error._message });
+  }
 };

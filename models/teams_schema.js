@@ -2,11 +2,12 @@ import mongoose from "mongoose";
 
 const teamSchema = new mongoose.Schema(
   {
-    _id: { type: String, maxLength: 9, required: true },
+    _id: { type: String, minlength: 6, maxLength: 6, required: true },
     name: { type: String, maxLength: 50, required: true },
     description: { type: String, maxLength: 200, required: false },
-    members: [{ type: String, required: true, minlength: 9 }],
+    members: [{ type: String, required: true, minlength: 6 }],
     badgeColor: { type: String, required: false },
+    createdBy: { type: String, minlength: 6, maxLength: 6, required: true },
     tasks: [
       {
         title: { type: String, maxLength: 100, required: true },
