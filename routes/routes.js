@@ -7,6 +7,7 @@ import {
   getUserDetails,
   createTeam,
   createTask,
+  getAllTeamTasks,
 } from "../controllers/controllers.js";
 
 const router = Router();
@@ -18,5 +19,6 @@ router.route("/signin").post(signin);
 router.route("/userdetails").get(getUserDetails);
 router.route("/createteam").post(createTeam);
 router.route("/task/create").put(createTask);
+router.route("/tasks/all/:teamID").get(getAllTeamTasks);
 
 export default router;

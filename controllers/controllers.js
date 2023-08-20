@@ -143,3 +143,17 @@ export const createTask = async (req, res) => {
     res.status(500).send({ message: "something went wrong" });
   }
 };
+
+export const getAllTeamTasks = async (req, res) => {
+  const { teamID } = req.params;
+  const tasks = await teamModel.findOne({ _id: teamID }).select({ tasks: 1 });
+  if (!tasks) {
+    res
+      .status(404)
+      .send({ message: `team with id: ${teamID} does not exists` });
+    return;
+  }
+  res
+    .status(200)
+    .send({ message: "tasks recieved successfully!", data: tasks });
+};
