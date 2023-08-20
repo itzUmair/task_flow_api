@@ -21,6 +21,12 @@ const teamSchema = new mongoose.Schema(
         createdOn: { type: Date, required: true },
       },
     ],
+    logs: [
+      {
+        message: { type: String, maxLength: 200, required: true },
+        date: { type: Date, required: true },
+      },
+    ],
   },
   { collection: "teams" }
 );

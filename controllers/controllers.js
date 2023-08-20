@@ -109,7 +109,7 @@ export const createTask = async (req, res) => {
     teamID,
   } = req.body;
 
-  const team = await teamModel.findOne({ _id: teamID });
+  const team = await teamModel.findById(teamID);
   if (!team) {
     res.status(404).send({ message: "no team with this team id found" });
     return;
@@ -146,7 +146,7 @@ export const createTask = async (req, res) => {
 
 export const getAllTeamTasks = async (req, res) => {
   const { teamID } = req.params;
-  const tasks = await teamModel.findOne({ _id: teamID }).select({ tasks: 1 });
+  const tasks = await teamModel.findById(teamID).select({ tasks: 1 });
   if (!tasks) {
     res
       .status(404)
@@ -156,4 +156,56 @@ export const getAllTeamTasks = async (req, res) => {
   res
     .status(200)
     .send({ message: "tasks recieved successfully!", data: tasks });
+};
+
+export const addTeamMembers = async (req, res) => {
+  const { userID, teamID } = req.body;
+  const team = await teamModel.findById(teamID);
+  if (!team) {
+    res
+      .status(404)
+      .send({ message: `team with id: ${teamID} does not exists` });
+    return;
+  }
+
+  const user = await userModel.findById(userID);
+
+  if (team.members.includes(userID)) {
+    res.status(400).send({
+      message: `${
+        user.first_name + " " + user.last_name
+      } is already in this team.`,
+    });
+    return;
+  }
+
+  if (!user) {
+    res
+      .status(404)
+      .send({ message: `user with id: ${userID} does not exists` });
+    return;
+  }
+  const userAdder = await userModel.findById(getUserIdFromToken(req));
+  try {
+    team.members.push(userID);
+    team.logs.push({
+      message: `${
+        user.first_name + " " + user.last_name
+      } was added to the team by ${
+        userAdder.first_name + " " + userAdder.last_name
+      }.`,
+      date: Date.now(),
+    });
+    await team.save();
+    res.status(200).send({
+      message: `${
+        user.first_name + " " + user.last_name
+      } was added to the team.`,
+    });
+  } catch (error) {
+    if (error instanceof mongoose.Error.ValidationError) {
+      res.status(400).send({ message: error._message });
+    }
+    res.status(500).send({ message: "something went wrong" });
+  }
 };
