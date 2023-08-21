@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 import asyncHanlder from "express-async-handler";
 import userModel from "../models/user_schema.js";
 import teamModel from "../models/teams_schema.js";
-import { generateRandomId, getUserIdFromToken } from "../utils/utils.js";
+import { generateRandomId, getUserInfoFromToken } from "../utils/utils.js";
 
 export const home = (req, res) => {
   res.status(200).send("Task flow API");
@@ -45,7 +45,7 @@ export const signin = async (req, res) => {
   const { email, password } = req.body;
   const userExists = await userModel
     .findOne({ email })
-    .select({ email: 1, password: 1 });
+    .select({ email: 1, password: 1, first_name: 1, last_name: 1 });
   if (!userExists) {
     res.status(404).send({ message: "no account with this email exists" });
     return;
@@ -55,14 +55,22 @@ export const signin = async (req, res) => {
     res.status(401).send({ message: "wrong password" });
     return;
   }
-  const token = jwt.sign({ userid: userExists._id }, process.env.JWT_SECRET, {
-    expiresIn: "24h",
-  });
+  const token = jwt.sign(
+    {
+      userid: userExists._id,
+      fname: userExists.first_name,
+      lname: userExists.last_name,
+    },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: "24h",
+    }
+  );
   res.status(200).send({ message: "logged in successfully", token });
 };
 
 export const getUserDetails = async (req, res) => {
-  const userID = getUserIdFromToken(req);
+  const userID = getUserInfoFromToken(req).userid;
   const userData = await userModel.findById(userID);
   if (!userData) {
     res.status(404).send({ message: "no user found" });
@@ -73,7 +81,7 @@ export const getUserDetails = async (req, res) => {
 
 export const createTeam = async (req, res) => {
   const { name, description, members, badgeColor } = req.body;
-  const createrID = getUserIdFromToken(req);
+  const createrID = getUserInfoFromToken(req).userid;
   const teamID = generateRandomId();
 
   try {
@@ -191,7 +199,7 @@ export const addTeamMembers = async (req, res) => {
       .send({ message: `user with id: ${userID} does not exists` });
     return;
   }
-  const userAdder = await userModel.findById(getUserIdFromToken(req));
+  const userAdder = getUserInfoFromToken(req);
   try {
     team.members.push(userID);
     await team.save();
@@ -268,9 +276,7 @@ export const markTaskAsComplete = async (req, res) => {
   team.tasks = newTasks;
   try {
     await team.save();
-    const user = await userModel
-      .findById(getUserIdFromToken(req))
-      .select({ first_name: 1, last_name: 1 });
+    const user = getUserInfoFromToken(req);
     team.logs.push({
       message: `${taskTitle} was completed by ${
         user.first_name + " " + user.last_name
