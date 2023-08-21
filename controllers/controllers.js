@@ -266,6 +266,10 @@ export const markTaskAsComplete = async (req, res) => {
   let taskTitle = "";
   const newTasks = team.tasks.map((task) => {
     if (task._id === taskID) {
+      if (task.state === "complete") {
+        res.status(400).send({ message: "task is already complete" });
+        return;
+      }
       taskTitle = task.title;
       return { ...task.toObject(), state: "complete" };
     } else {
@@ -279,6 +283,86 @@ export const markTaskAsComplete = async (req, res) => {
     const user = getUserInfoFromToken(req);
     team.logs.push({
       message: `${taskTitle} was completed by ${
+        user.first_name + " " + user.last_name
+      }`,
+    });
+    team.save();
+    res.status(200).send({ message: "task updated successfully" });
+  } catch (error) {
+    console.log(error);
+    if (error instanceof mongoose.Error.ValidationError) {
+      res.status(400).send({ message: error._message });
+    }
+    res.status(500).send({ message: "something went wrong" });
+  }
+};
+
+export const markTaskAsWorking = async (req, res) => {
+  const { teamID, taskID } = req.body;
+  const team = await teamModel.findById(teamID);
+  if (!team) {
+    res.status(404).send({ message: `no team with id ${teamID} exists.` });
+    return;
+  }
+  let taskTitle = "";
+  const newTasks = team.tasks.map((task) => {
+    if (task._id === taskID) {
+      if (task.state === "working") {
+        res.status(400).send({ message: "task is already in working" });
+        return;
+      }
+      taskTitle = task.title;
+      return { ...task.toObject(), state: "working" };
+    } else {
+      return task;
+    }
+  });
+  team.tasks = newTasks;
+  try {
+    await team.save();
+    const user = getUserInfoFromToken(req);
+    team.logs.push({
+      message: `${taskTitle} was set to working by ${
+        user.first_name + " " + user.last_name
+      }`,
+    });
+    team.save();
+    res.status(200).send({ message: "task updated successfully" });
+  } catch (error) {
+    console.log(error);
+    if (error instanceof mongoose.Error.ValidationError) {
+      res.status(400).send({ message: error._message });
+    }
+    res.status(500).send({ message: "something went wrong" });
+  }
+};
+
+export const markTaskAsPending = async (req, res) => {
+  const { teamID, taskID } = req.body;
+  const team = await teamModel.findById(teamID);
+  if (!team) {
+    res.status(404).send({ message: `no team with id ${teamID} exists.` });
+    return;
+  }
+  let taskTitle = "";
+  const newTasks = team.tasks.map((task) => {
+    if (task._id === taskID) {
+      if (task.state === "pending") {
+        res.status(400).send({ message: "task is already pending" });
+        return;
+      }
+      taskTitle = task.title;
+      return { ...task.toObject(), state: "pending" };
+    } else {
+      return task;
+    }
+  });
+  team.tasks = newTasks;
+  try {
+    await team.save();
+    const user = getUserInfoFromToken(req);
+    team.logs.push({
+      message: `${taskTitle} was set to pending by ${
         user.first_name + " " + user.last_name
       }`,
     });

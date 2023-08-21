@@ -12,6 +12,8 @@ import {
   getAllTeamMembers,
   getAllTeamLogs,
   markTaskAsComplete,
+  markTaskAsWorking,
+  markTaskAsPending,
 } from "../controllers/controllers.js";
 
 const router = Router();
@@ -28,5 +30,7 @@ router.route("/team/members/add").post(addTeamMembers);
 router.route("/team/members/all/:teamID").get(getAllTeamMembers);
 router.route("/team/logs/all:teamID").get(getAllTeamLogs);
 router.route("/team/tasks/markcomplete").patch(markTaskAsComplete);
+router.route("/team/tasks/markworking").patch(markTaskAsWorking);
+router.route("/team/tasks/markpending").patch(markTaskAsPending);
 
 export default router;
