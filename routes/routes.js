@@ -11,6 +11,7 @@ import {
   addTeamMembers,
   getAllTeamMembers,
   getAllTeamLogs,
+  markTaskAsComplete,
 } from "../controllers/controllers.js";
 
 const router = Router();
@@ -26,5 +27,6 @@ router.route("/tasks/all/:teamID").get(getAllTeamTasks);
 router.route("/team/members/add").post(addTeamMembers);
 router.route("/team/members/all/:teamID").get(getAllTeamMembers);
 router.route("/team/logs/all:teamID").get(getAllTeamLogs);
+router.route("/team/tasks/markcomplete").patch(markTaskAsComplete);
 
 export default router;

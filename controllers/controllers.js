@@ -115,8 +115,10 @@ export const createTask = async (req, res) => {
     res.status(404).send({ message: "no team with this team id found" });
     return;
   }
+  const taskID = generateRandomId();
   try {
     team.tasks.push({
+      _id: taskID,
       title,
       description,
       priority,
@@ -243,4 +245,44 @@ export const getAllTeamLogs = async (req, res) => {
   res
     .status(200)
     .send({ message: "fetched team logs successfully", data: teamLogs });
+};
+
+export const markTaskAsComplete = async (req, res) => {
+  const { teamID, taskID } = req.body;
+
+  const team = await teamModel.findById(teamID);
+  if (!team) {
+    res.status(404).send({ message: `no team with id ${teamID} exists.` });
+    return;
+  }
+  let taskTitle = "";
+  const newTasks = team.tasks.map((task) => {
+    if (task._id === taskID) {
+      taskTitle = task.title;
+      return { ...task.toObject(), state: "complete" };
+    } else {
+      return task;
+    }
+  });
+
+  team.tasks = newTasks;
+  try {
+    await team.save();
+    const user = await userModel
+      .findById(getUserIdFromToken(req))
+      .select({ first_name: 1, last_name: 1 });
+    team.logs.push({
+      message: `${taskTitle} was completed by ${
+        user.first_name + " " + user.last_name
+      }`,
+    });
+    team.save();
+    res.status(200).send({ message: "task updated successfully" });
+  } catch (error) {
+    console.log(error);
+    if (error instanceof mongoose.Error.ValidationError) {
+      res.status(400).send({ message: error._message });
+    }
+    res.status(500).send({ message: "something went wrong" });
+  }
 };

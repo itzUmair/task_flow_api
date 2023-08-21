@@ -10,6 +10,7 @@ const teamSchema = new mongoose.Schema(
     createdBy: { type: String, minlength: 6, maxLength: 6, required: true },
     tasks: [
       {
+        _id: { type: String, minlength: 6, maxLength: 6, required: true },
         title: { type: String, maxLength: 100, required: true },
         description: { type: String, maxLength: 1000, required: true },
         priority: {
