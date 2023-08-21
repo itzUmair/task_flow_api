@@ -12,9 +12,17 @@ const teamSchema = new mongoose.Schema(
       {
         title: { type: String, maxLength: 100, required: true },
         description: { type: String, maxLength: 1000, required: true },
-        priority: { type: String, maxLength: 6, required: true },
+        priority: {
+          type: String,
+          enum: ["high", "low", "medium"],
+          required: true,
+        },
         deadline: { type: Date, required: true },
-        state: { type: String, maxLength: 5, required: true },
+        state: {
+          type: String,
+          enum: ["complete", "pending", "working"],
+          required: true,
+        },
         completionDate: { type: Date },
         completedBy: { type: String, required: true },
         createdBy: { type: String, required: true },
@@ -24,7 +32,7 @@ const teamSchema = new mongoose.Schema(
     logs: [
       {
         message: { type: String, maxLength: 200, required: true },
-        date: { type: Date, required: true },
+        date: { type: Date, default: Date.now() },
       },
     ],
   },

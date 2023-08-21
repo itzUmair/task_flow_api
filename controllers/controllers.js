@@ -1,5 +1,6 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 import asyncHanlder from "express-async-handler";
 import userModel from "../models/user_schema.js";
 import teamModel from "../models/teams_schema.js";
@@ -115,30 +116,33 @@ export const createTask = async (req, res) => {
     return;
   }
   try {
-    team.tasks.push(
-      { _id: teamID },
-      {
-        tasks: [
-          ...team.tasks,
-          {
-            title,
-            description,
-            priority,
-            deadline,
-            state,
-            completionDate,
-            completedBy,
-            createdBy,
-            createdOn,
-          },
-        ],
-      }
-    );
+    team.tasks.push({
+      title,
+      description,
+      priority,
+      deadline,
+      state,
+      completionDate,
+      completedBy,
+      createdBy,
+      createdOn,
+    });
+    await team.save();
+    const user = await userModel
+      .findById(createdBy)
+      .select({ first_name: 1, last_name: 1 });
+    team.logs.push({
+      message: `${title} was added to team tasks by ${
+        user.first_name + " " + user.last_name
+      }`,
+    });
     await team.save();
     res.status(200).send({ message: "task created successfully" });
   } catch (error) {
+    console.log(error);
     if (error instanceof mongoose.Error.ValidationError) {
       res.status(400).send({ message: error._message });
+      return;
     }
     res.status(500).send({ message: "something went wrong" });
   }
@@ -188,15 +192,16 @@ export const addTeamMembers = async (req, res) => {
   const userAdder = await userModel.findById(getUserIdFromToken(req));
   try {
     team.members.push(userID);
+    await team.save();
     team.logs.push({
       message: `${
         user.first_name + " " + user.last_name
       } was added to the team by ${
         userAdder.first_name + " " + userAdder.last_name
       }.`,
-      date: Date.now(),
     });
     await team.save();
+
     res.status(200).send({
       message: `${
         user.first_name + " " + user.last_name
