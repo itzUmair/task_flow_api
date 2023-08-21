@@ -14,6 +14,7 @@ import {
   markTaskAsComplete,
   markTaskAsWorking,
   markTaskAsPending,
+  deleteTask,
 } from "../controllers/controllers.js";
 
 const router = Router();
@@ -32,5 +33,6 @@ router.route("/team/logs/all:teamID").get(getAllTeamLogs);
 router.route("/team/tasks/markcomplete").patch(markTaskAsComplete);
 router.route("/team/tasks/markworking").patch(markTaskAsWorking);
 router.route("/team/tasks/markpending").patch(markTaskAsPending);
+router.route("/team/tasks/delete").delete(deleteTask);
 
 export default router;

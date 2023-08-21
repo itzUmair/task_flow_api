@@ -149,7 +149,6 @@ export const createTask = async (req, res) => {
     await team.save();
     res.status(200).send({ message: "task created successfully" });
   } catch (error) {
-    console.log(error);
     if (error instanceof mongoose.Error.ValidationError) {
       res.status(400).send({ message: error._message });
       return;
@@ -286,10 +285,9 @@ export const markTaskAsComplete = async (req, res) => {
         user.first_name + " " + user.last_name
       }`,
     });
-    team.save();
+    await team.save();
     res.status(200).send({ message: "task updated successfully" });
   } catch (error) {
-    console.log(error);
     if (error instanceof mongoose.Error.ValidationError) {
       res.status(400).send({ message: error._message });
     }
@@ -326,10 +324,9 @@ export const markTaskAsWorking = async (req, res) => {
         user.first_name + " " + user.last_name
       }`,
     });
-    team.save();
+    await team.save();
     res.status(200).send({ message: "task updated successfully" });
   } catch (error) {
-    console.log(error);
     if (error instanceof mongoose.Error.ValidationError) {
       res.status(400).send({ message: error._message });
     }
@@ -366,10 +363,43 @@ export const markTaskAsPending = async (req, res) => {
         user.first_name + " " + user.last_name
       }`,
     });
-    team.save();
+    await team.save();
     res.status(200).send({ message: "task updated successfully" });
   } catch (error) {
-    console.log(error);
+    if (error instanceof mongoose.Error.ValidationError) {
+      res.status(400).send({ message: error._message });
+    }
+    res.status(500).send({ message: "something went wrong" });
+  }
+};
+
+export const deleteTask = async (req, res) => {
+  const { teamID, taskID, userID } = req.body;
+
+  const team = await teamModel.findById(teamID);
+
+  if (!team) {
+    res.status(404).send({ message: `no team with id ${teamID} exists` });
+    return;
+  }
+
+  const newTasks = team.tasks.filter((task) => {
+    if (task._id !== taskID) {
+      return task;
+    }
+  });
+  try {
+    team.tasks = newTasks;
+    await team.save();
+    const user = getUserInfoFromToken(req);
+    team.logs.push({
+      message: `${taskTitle} was deleted by ${
+        user.first_name + " " + user.last_name
+      }`,
+    });
+    await team.save();
+    res.status(200).send({ message: "task deleted successfully" });
+  } catch (error) {
     if (error instanceof mongoose.Error.ValidationError) {
       res.status(400).send({ message: error._message });
     }
