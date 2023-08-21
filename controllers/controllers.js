@@ -214,3 +214,33 @@ export const addTeamMembers = async (req, res) => {
     res.status(500).send({ message: "something went wrong" });
   }
 };
+
+export const getAllTeamMembers = async (req, res) => {
+  const { teamID } = req.params;
+
+  const teamMembers = await teamModel.findById(teamID).select({ members: 1 });
+
+  if (!teamMembers) {
+    res.status(404).send({ message: `no team with id ${teamID} exists.` });
+    return;
+  }
+
+  res
+    .status(200)
+    .send({ message: "fetched team members successfully", data: teamMembers });
+};
+
+export const getAllTeamLogs = async (req, res) => {
+  const { teamID } = req.params;
+
+  const teamLogs = await teamModel.findById(teamID).select({ logs: 1 });
+
+  if (!teamLogs) {
+    res.status(404).send({ message: `no team with id ${teamID} exists.` });
+    return;
+  }
+
+  res
+    .status(200)
+    .send({ message: "fetched team logs successfully", data: teamLogs });
+};
