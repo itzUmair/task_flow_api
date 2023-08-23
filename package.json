@@ -1,14 +1,14 @@
 {
-  "name": "server",
+  "name": "task-flow-api",
   "version": "1.0.0",
-  "description": "",
+  "description": "this is the api for the task flow app.",
   "type": "module",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon index.js"
   },
   "keywords": [],
-  "author": "",
+  "author": "muhammadumair2511@gmail.com",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.1.1",

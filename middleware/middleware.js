@@ -5,6 +5,11 @@ dotenv.config();
 export const authenticationMiddleware = (req, res, next) => {
   const authHeader = req.headers.authorization;
 
+  if (req.url.endsWith("/signin") || req.url.endsWith("/signup")) {
+    next();
+    return;
+  }
+
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     return res
       .status(401)

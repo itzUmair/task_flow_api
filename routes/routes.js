@@ -15,6 +15,7 @@ import {
   markTaskAsWorking,
   markTaskAsPending,
   deleteTask,
+  userInTeams,
 } from "../controllers/controllers.js";
 
 const router = Router();
@@ -34,5 +35,6 @@ router.route("/team/tasks/markcomplete").patch(markTaskAsComplete);
 router.route("/team/tasks/markworking").patch(markTaskAsWorking);
 router.route("/team/tasks/markpending").patch(markTaskAsPending);
 router.route("/team/tasks/delete").delete(deleteTask);
+router.route("/user/teams").get(userInTeams);
 
 export default router;

@@ -9,6 +9,7 @@ const userSchema = new mongoose.Schema(
     occupation: { type: String, maxLength: 50, required: true },
     email: { type: String, required: true },
     password: { type: String, required: true },
+    bagdeColor: { type: String, default: "#4DBB3B", required: true },
   },
   { collection: "users" }
 );

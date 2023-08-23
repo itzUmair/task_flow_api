@@ -4,14 +4,25 @@ import mongoose from "mongoose";
 import asyncHanlder from "express-async-handler";
 import userModel from "../models/user_schema.js";
 import teamModel from "../models/teams_schema.js";
-import { generateRandomId, getUserInfoFromToken } from "../utils/utils.js";
+import * as dotenv from "dotenv";
+dotenv.config();
+
+import {
+  generateRandomId,
+  getUserInfoFromToken,
+  generateRandomColor,
+} from "../utils/utils.js";
 
 export const home = (req, res) => {
   res.status(200).send("Task flow API");
 };
 
 export const verifyToken = (req, res) => {
-  res.status(200).send({ message: "token verified" });
+  const userData = jwt.decode(
+    req.headers.authorization.split[1],
+    process.env.JWT_SECRET
+  );
+  res.status(200).send({ message: "token verified", data: userData });
 };
 
 export const signup = async (req, res) => {
@@ -25,6 +36,7 @@ export const signup = async (req, res) => {
   }
   const hashedPassword = await bcrypt.hash(password, 10);
   const id = generateRandomId();
+  const badgeColor = `#${generateRandomColor()}`;
   try {
     await userModel.create({
       _id: id,
@@ -34,6 +46,7 @@ export const signup = async (req, res) => {
       occupation,
       email,
       password: hashedPassword,
+      badgeColor,
     });
     res.status(201).send({ message: "user created successfully" });
   } catch (error) {
@@ -43,9 +56,13 @@ export const signup = async (req, res) => {
 
 export const signin = async (req, res) => {
   const { email, password } = req.body;
-  const userExists = await userModel
-    .findOne({ email })
-    .select({ email: 1, password: 1, first_name: 1, last_name: 1 });
+  const userExists = await userModel.findOne({ email }).select({
+    email: 1,
+    password: 1,
+    first_name: 1,
+    last_name: 1,
+    badgeColor: 1,
+  });
   if (!userExists) {
     res.status(404).send({ message: "no account with this email exists" });
     return;
@@ -55,18 +72,23 @@ export const signin = async (req, res) => {
     res.status(401).send({ message: "wrong password" });
     return;
   }
+  const userData = {
+    userid: userExists._id,
+    fname: userExists.first_name,
+    lname: userExists.last_name,
+    email: userExists.email,
+    badgeColor: userExists.badgeColor,
+  };
   const token = jwt.sign(
     {
-      userid: userExists._id,
-      fname: userExists.first_name,
-      lname: userExists.last_name,
+      userData,
     },
     process.env.JWT_SECRET,
     {
       expiresIn: "24h",
     }
   );
-  res.status(200).send({ message: "logged in successfully", token });
+  res.status(200).send({ message: "logged in successfully", token, userData });
 };
 
 export const getUserDetails = async (req, res) => {
@@ -405,4 +427,16 @@ export const deleteTask = async (req, res) => {
     }
     res.status(500).send({ message: "something went wrong" });
   }
+};
+
+export const userInTeams = async (req, res) => {
+  const { userid } = getUserInfoFromToken(req);
+
+  const teams = await teamModel.find({ members: userid });
+
+  if (!teams) {
+    res.status(404).send({ message: "user is not in any team" });
+    return;
+  }
+  res.status(200).send({ message: "got teams data successfully", data: teams });
 };

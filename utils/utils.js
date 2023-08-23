@@ -21,3 +21,6 @@ export const getUserInfoFromToken = (req) => {
   const { userid, fname, lname } = jwt.decode(token, process.env.JWT_SECRET);
   return { userid, fname, lname };
 };
+
+export const generateRandomColor = () =>
+  Math.floor(Math.random() * 16777215).toString(16);
