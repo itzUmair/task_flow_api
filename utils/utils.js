@@ -17,7 +17,7 @@ export const generateRandomId = () => {
 };
 
 export const getUserInfoFromToken = (req) => {
-  const token = req.headers.authorization.split(" ")[1];
+  const token = req.cookies._auth;
   const { userid, fname, lname } = jwt.decode(token, process.env.JWT_SECRET);
   return { userid, fname, lname };
 };

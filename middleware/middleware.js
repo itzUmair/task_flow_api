@@ -3,23 +3,21 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 export const authenticationMiddleware = (req, res, next) => {
-  const authHeader = req.headers.authorization;
+  const authCookie = req.cookies._auth;
 
   if (req.url.endsWith("/signin") || req.url.endsWith("/signup")) {
     next();
     return;
   }
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  if (!authCookie) {
     return res
       .status(401)
       .send({ message: "You are not authorized to access the API." });
   }
 
-  const token = authHeader.split(" ")[1];
-
   try {
-    jwt.verify(token, process.env.JWT_SECRET);
+    jwt.verify(authCookie, process.env.JWT_SECRET);
     next();
   } catch (error) {
     return res.status(401).send({ message: "Invalid token." });

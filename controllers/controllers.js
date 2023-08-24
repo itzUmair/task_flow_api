@@ -18,10 +18,7 @@ export const home = (req, res) => {
 };
 
 export const verifyToken = (req, res) => {
-  const userData = jwt.decode(
-    req.headers.authorization.split[1],
-    process.env.JWT_SECRET
-  );
+  const userData = jwt.decode(req.cookies._auth, process.env.JWT_SECRET);
   res.status(200).send({ message: "token verified", data: userData });
 };
 
