@@ -428,9 +428,7 @@ export const deleteTask = async (req, res) => {
 
 export const userInTeams = async (req, res) => {
   const { userid } = getUserInfoFromToken(req);
-
   const teams = await teamModel.find({ members: userid });
-
   if (!teams) {
     res.status(404).send({ message: "user is not in any team" });
     return;
