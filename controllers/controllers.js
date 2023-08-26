@@ -89,8 +89,8 @@ export const signin = async (req, res) => {
 };
 
 export const getUserDetails = async (req, res) => {
-  const userID = getUserInfoFromToken(req).userid;
-  const userData = await userModel.findById(userID);
+  const userID = req.params.userid;
+  const userData = await userModel.findById(userID).select({ password: -1 });
   if (!userData) {
     res.status(404).send({ message: "no user found" });
     return;
@@ -253,20 +253,21 @@ export const getAllTeamMembers = async (req, res) => {
     return;
   }
 
+  const membersData = await userModel
+    .find({
+      _id: { $in: teamMembers.members },
+    })
+    .select({ _id: 1, badgeColor: 1, first_name: 1, last_name: 1, email: 1 });
+
   res
     .status(200)
-    .send({ message: "fetched team members successfully", data: teamMembers });
+    .send({ message: "fetched team members successfully", data: membersData });
 };
 
 export const getAllTeamLogs = async (req, res) => {
   const { teamID } = req.params;
 
-  const teamLogs = await teamModel.findById(teamID).select({ logs: 1 });
-
-  if (!teamLogs) {
-    res.status(404).send({ message: `no team with id ${teamID} exists.` });
-    return;
-  }
+  const teamLogs = await teamModel.findById(teamID);
 
   res
     .status(200)

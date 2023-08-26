@@ -25,7 +25,7 @@ const teamSchema = new mongoose.Schema(
           required: true,
         },
         completionDate: { type: Date },
-        completedBy: { type: String, required: true },
+        completedBy: { type: String },
         createdBy: { type: String, required: true },
         createdOn: { type: Date, required: true },
       },
